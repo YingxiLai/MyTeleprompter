@@ -25,7 +25,7 @@ body {
 button {
     font-size: 16px;
     padding: 8px 15px;
-    margin: 0 10px;
+    margin: 0 5px; /* 缩小了左右边距以容纳新按钮 */
     cursor: pointer;
 }
 
@@ -43,14 +43,9 @@ input[type="range"] {
     height: 85vh; /* 高度占屏幕的85% */
     margin: 0 auto; /* 居中显示 */
     display: block;
-    
-    /* ▼▼▼ 就是这里！我们添加了这一行！ ▼▼▼ */
     font-family: sans-serif; /* 强制默认字体为黑体 */
-    
-    /* 关键：设置超大字体！*/
     font-size: 60px;
     line-height: 1.4; /* 行高，让字更清晰 */
-    
     border: none; /* 去掉边框 */
     outline: none; /* 去掉点击时的蓝框 */
     
@@ -58,6 +53,9 @@ input[type="range"] {
     padding-top: 70px; 
     padding-left: 20px;
     padding-right: 20px;
+    
+    /* 让文本框的尺寸变化更平滑 */
+    transition: all 0.2s ease;
 }
 
 /* 字体和速度旁边的文字 */
@@ -74,3 +72,22 @@ input[type="range"] {
     margin-left: 5px;
     vertical-align: middle;
 }
+
+/* ▼▼▼ --- 新增的全屏样式 --- ▼▼▼ */
+
+/* 当我们给 body 添加 .fullscreen-active 类时... */
+body.fullscreen-active .controls {
+    /* 隐藏控制栏 */
+    display: none;
+}
+
+body.fullscreen-active #scriptArea {
+    /* 让文本区域占满整个屏幕 */
+    height: 100vh;
+    width: 100%;
+    /* 顶部内边距也调整一下 */
+    padding-top: 20px; 
+    padding-left: 20px;
+    padding-right: 20px;
+}
+/* ▲▲▲ --- 新增样式结束 --- ▲▲▲ */

@@ -8,56 +8,83 @@ document.addEventListener('DOMContentLoaded', function() {
     const resetButton = document.getElementById('resetButton');
     const speedControl = document.getElementById('speedControl');
     const fontSelector = document.getElementById('fontSelector');
-    // ▼▼▼ 确保这一行代码存在 ▼▼▼
     const fontSizeControl = document.getElementById('fontSizeControl');
+    // ▼▼▼ 新增：找到全屏按钮 ▼▼▼
+    const fullscreenButton = document.getElementById('fullscreenButton');
 
     // 2. 定义变量
-    let scrollInterval = null; // 用来存放我们的“滚动定时器”
-    let scrollSpeed = 10 - speedControl.value; // 滚动速度（值越小越快，所以用10减）
+    let scrollInterval = null; 
+    let scrollSpeed = 10 - speedControl.value; 
 
     // 3. 定义功能函数
 
-    // 开始滚动的函数
+    // (startScroll, pauseScroll, resetScroll... 
+    // ... updateSpeed, updateFont, updateFontSize 
+    // ... 这些函数和以前一样，保持不变)
+    
     function startScroll() {
         clearInterval(scrollInterval);
         scrollInterval = setInterval(function() {
             scriptArea.scrollTop += 1; 
         }, scrollSpeed * 10); 
     }
-
-    // 暂停滚动的函数
+    
     function pauseScroll() {
         clearInterval(scrollInterval);
     }
-
-    // 重置滚动的函数
+    
     function resetScroll() {
         clearInterval(scrollInterval);
         scriptArea.scrollTop = 0;
     }
-
-    // 更新速度的函数
+    
     function updateSpeed() {
         scrollSpeed = 11 - speedControl.value;
         if (scrollInterval) {
             startScroll();
         }
     }
-
-    // 更新字体的函数
+    
     function updateFont() {
         const selectedFont = fontSelector.value;
         scriptArea.style.fontFamily = selectedFont;
     }
-
-    // ▼▼▼ 确保这个新函数存在 ▼▼▼
-    // 新增：更新字体大小的函数
+    
     function updateFontSize() {
-        // 1. 获取滑块的当前值 (比如 "150")
         const selectedSize = fontSizeControl.value;
-        // 2. 把它应用到文本区域的样式上 (变成 "150px")
         scriptArea.style.fontSize = selectedSize + 'px';
     }
+    
+    // ▼▼▼ --- 新增的全屏功能 --- ▼▼▼
+    
+    // 切换全屏的函数
+    function toggleFullscreen() {
+        // 检查当前是否已经是全屏状态
+        if (!document.fullscreenElement) {
+            // 如果不是全屏，则请求进入全屏
+            document.documentElement.requestFullscreen();
+        } else {
+            // 如果是全屏，则退出全屏
+            if (document.exitFullscreen) {
+                document.exitFullscreen();
+            }
+        }
+    }
+
+    // 监听浏览器的全屏状态变化（这很关键，包括按 Esc 键）
+    document.addEventListener('fullscreenchange', () => {
+        // 检查浏览器当前是否处于全屏状态
+        if (document.fullscreenElement) {
+            // 是：我们刚刚进入了全屏
+            // 给 body 添加 'fullscreen-active' 类，CSS 就会生效
+            document.body.classList.add('fullscreen-active');
+        } else {
+            // 否：我们刚刚退出了全屏
+            // 移除 'fullscreen-active' 类，CSS 就会恢复
+            document.body.classList.remove('fullscreen-active');
+        }
+    });
+    // ▲▲▲ --- 新增功能结束 --- ▲▲▲
 
 
     // 4. 把功能绑定到按钮上
@@ -66,9 +93,8 @@ document.addEventListener('DOMContentLoaded', function() {
     resetButton.addEventListener('click', resetScroll);
     speedControl.addEventListener('input', updateSpeed);
     fontSelector.addEventListener('change', updateFont);
-    
-    // ▼▼▼ 确保这一行代码存在 ▼▼▼
-    // 我们用 'input' 事件，这样拖动时就会实时变化
     fontSizeControl.addEventListener('input', updateFontSize);
+    // ▼▼▼ 新增：绑定全屏按钮 ▼▼▼
+    fullscreenButton.addEventListener('click', toggleFullscreen);
 
 });
