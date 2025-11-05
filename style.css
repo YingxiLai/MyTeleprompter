@@ -8,7 +8,7 @@ body {
     overflow: hidden; 
 }
 
-/* ▼▼▼ 顶部的控制面板 (重构) ▼▼▼ */
+/* ▼▼▼ 顶部的控制面板 (和之前一样) ▼▼▼ */
 .controls {
     background-color: #222;
     padding: 10px;
@@ -22,7 +22,6 @@ body {
     align-items: center;
     gap: 10px; /* 元素之间的间隙 */
 }
-/* ... (控制面板的按钮, 控制组, 按钮组 样式都和之前一样, 省略) ... */
 .controls button {
     font-size: 14px;
     padding: 6px 12px;
@@ -50,7 +49,7 @@ body {
 .button-group button.active { background-color: #007bff; color: white; }
 
 
-/* ▼▼▼ 稿子文本区域 ▼▼▼ */
+/* ▼▼▼ 稿子文本区域 (和之前一样) ▼▼▼ */
 #scriptArea {
     background-color: #000;
     color: #fff;
@@ -58,73 +57,88 @@ body {
     height: 85vh; 
     margin: 0 auto; 
     display: block;
-    
     font-family: sans-serif; 
     font-size: 60px;
     line-height: 1.4; 
-    
     border: none; 
     outline: none; 
-    
     padding-top: 120px; 
     padding-left: 20px;
     padding-right: 20px;
-    
     transition: all 0.2s ease;
-    
     overflow-x: hidden;
     overflow-y: auto;
-    
     white-space: normal;
     overflow-wrap: break-word;
 }
-
-/* ▼▼▼ 横向滚动样式 (已修复) ▼▼▼ */
 #scriptArea.horizontal-scroll {
     white-space: nowrap; 
     overflow-x: auto;
     overflow-y: hidden;
-    
-    /* 关键：让所有 <p> 标签横向排列 */
     display: flex;
     flex-direction: row;
-    
-    /* ▼▼▼ 新增：让文字垂直居中 ▼▼▼ */
     align-items: center;
 }
-/* 关键：设置 <p> 标签自身的样式 */
 #scriptArea.horizontal-scroll p {
-    white-space: nowrap; /* 强制 <p> 内部也不换行 */
-    margin: 0; /* 移除 <p> 默认的垂直边距 */
-    margin-right: 50px; /* 在“段落”之间增加 50px 的横向间距 */
+    white-space: nowrap; 
+    margin: 0;
+    margin-right: 50px; 
 }
 
 
-/* ▼▼▼ 全屏 X 退出按钮 (和之前一样) ▼▼▼ */
-#exitFullscreenButton {
+/* ▼▼▼ 新功能：全屏按钮容器 (已更新) ▼▼▼ */
+#fullscreenControls {
     position: fixed;
     top: 20px;
     right: 20px;
-    width: 40px;
-    height: 40px;
-    font-size: 24px;
+    z-index: 100;
+    
+    /* 默认隐藏 */
+    display: none;
+    opacity: 0;
+    
+    display: flex;
+    gap: 15px;
+    
+    /* 关键：自动隐藏的“渐变”动画，持续0.5秒 */
+    transition: opacity 0.5s ease-in-out;
+}
+/* 全屏按钮的统一样式 */
+#fullscreenControls button {
+    width: 60px; /* 增大了点击区域 */
+    height: 60px;
+    font-size: 18px;
     font-weight: bold;
     color: white;
     background-color: rgba(0, 0, 0, 0.5);
     border: 2px solid white;
-    border-radius: 50%;
+    border-radius: 50%; /* 圆形按钮 */
     cursor: pointer;
-    z-index: 100;
-    display: none;
 }
-#exitFullscreenButton:hover { background-color: rgba(255, 0, 0, 0.7); }
+#fullscreenControls button:hover {
+    background-color: rgba(255, 255, 255, 0.3);
+}
+/* “退出”按钮的特定样式（红色） */
+#fullscreenExitButton:hover {
+    background-color: rgba(255, 0, 0, 0.7);
+}
 
 
-/* ▼▼▼ 全屏模式的样式 (和之前一样) ▼▼▼ */
-body.fullscreen-active .controls { display: none; }
-body.fullscreen-active #exitFullscreenButton { display: block; }
+/* ▼▼▼ 全屏模式的样式 (已更新) ▼▼▼ */
+body.fullscreen-active .controls { 
+    display: none; /* 隐藏顶部控制栏 */
+}
+body.fullscreen-active #fullscreenControls {
+    display: flex; /* 显示全屏按钮容器 */
+    opacity: 1; /* 让它可见 */
+}
 body.fullscreen-active #scriptArea {
     height: 100vh;
     width: 100%;
     padding-top: 20px; 
+}
+
+/* ▼▼▼ 新功能：自动隐藏 (最关键) ▼▼▼ */
+body.idle-mode #fullscreenControls {
+    opacity: 0; /* 在“空闲”模式下，让按钮透明 */
 }
