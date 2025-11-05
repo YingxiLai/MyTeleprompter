@@ -8,7 +8,7 @@ body {
     overflow: hidden; 
 }
 
-/* ▼▼▼ 顶部的控制面板 (和之前一样) ▼▼▼ */
+/* ▼▼▼ 顶部的控制面板 ▼▼▼ */
 .controls {
     background-color: #222;
     padding: 10px;
@@ -49,7 +49,7 @@ body {
 .button-group button.active { background-color: #007bff; color: white; }
 
 
-/* ▼▼▼ 稿子文本区域 (和之前一样) ▼▼▼ */
+/* ▼▼▼ 稿子文本区域 ▼▼▼ */
 #scriptArea {
     background-color: #000;
     color: #fff;
@@ -77,7 +77,7 @@ body {
     overflow-y: hidden;
     display: flex;
     flex-direction: row;
-    align-items: center;
+    align-items: center; /* 垂直居中 */
 }
 #scriptArea.horizontal-scroll p {
     white-space: nowrap; 
@@ -86,59 +86,48 @@ body {
 }
 
 
-/* ▼▼▼ 新功能：全屏按钮容器 (已更新) ▼▼▼ */
+/* ▼▼▼ 新功能：全屏按钮容器 ▼▼▼ */
 #fullscreenControls {
     position: fixed;
     top: 20px;
     right: 20px;
     z-index: 100;
-    
-    /* 默认隐藏 */
     display: none;
     opacity: 0;
-    
     display: flex;
     gap: 15px;
-    
-    /* 关键：自动隐藏的“渐变”动画，持续0.5秒 */
     transition: opacity 0.5s ease-in-out;
 }
-/* 全屏按钮的统一样式 */
 #fullscreenControls button {
-    width: 60px; /* 增大了点击区域 */
+    width: 60px;
     height: 60px;
     font-size: 18px;
     font-weight: bold;
     color: white;
     background-color: rgba(0, 0, 0, 0.5);
     border: 2px solid white;
-    border-radius: 50%; /* 圆形按钮 */
+    border-radius: 50%;
     cursor: pointer;
 }
 #fullscreenControls button:hover {
     background-color: rgba(255, 255, 255, 0.3);
 }
-/* “退出”按钮的特定样式（红色） */
 #fullscreenExitButton:hover {
     background-color: rgba(255, 0, 0, 0.7);
 }
 
 
-/* ▼▼▼ 全屏模式的样式 (已更新) ▼▼▼ */
-body.fullscreen-active .controls { 
-    display: none; /* 隐藏顶部控制栏 */
-}
+/* ▼▼▼ 全屏模式的样式 ▼▼▼ */
+body.fullscreen-active .controls { display: none; }
 body.fullscreen-active #fullscreenControls {
-    display: flex; /* 显示全屏按钮容器 */
-    opacity: 1; /* 让它可见 */
+    display: flex;
+    opacity: 1;
 }
 body.fullscreen-active #scriptArea {
     height: 100vh;
     width: 100%;
     padding-top: 20px; 
 }
-
-/* ▼▼▼ 新功能：自动隐藏 (最关键) ▼▼▼ */
 body.idle-mode #fullscreenControls {
-    opacity: 0; /* 在“空闲”模式下，让按钮透明 */
+    opacity: 0; /* 自动隐藏 */
 }
