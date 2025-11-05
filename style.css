@@ -8,7 +8,7 @@ body {
     overflow: hidden; 
 }
 
-/* ▼▼▼ 顶部的控制面板 ▼▼▼ */
+/* ▼▼▼ 顶部的控制面板 (和之前一样) ▼▼▼ */
 .controls {
     background-color: #222;
     padding: 10px;
@@ -16,11 +16,11 @@ body {
     position: fixed;
     top: 0;
     z-index: 10;
-    display: flex; /* 使用 flex 布局 */
-    flex-wrap: wrap; /* 允许换行 */
-    justify-content: center; /* 居中 */
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: center;
     align-items: center;
-    gap: 10px; /* 元素之间的间隙 */
+    gap: 10px;
 }
 .controls button {
     font-size: 14px;
@@ -57,7 +57,7 @@ body {
     height: 85vh; 
     margin: 0 auto; 
     display: block;
-    font-family: sans-serif; 
+    font-family: sans-serif; /* 默认字体 */
     font-size: 60px;
     line-height: 1.4; 
     border: none; 
@@ -71,6 +71,17 @@ body {
     white-space: normal;
     overflow-wrap: break-word;
 }
+
+/* ▼▼▼ 关键：强制 <p> 标签继承字体 ▼▼▼ */
+/* 这会覆盖 contenteditable 的默认 <p> 样式 */
+#scriptArea p {
+    font-family: inherit;
+    /* 移除浏览器默认的 p 边距，这很重要 */
+    margin-block-start: 0;
+    margin-block-end: 0;
+}
+
+/* ▼▼▼ 横向滚动样式 ▼▼▼ */
 #scriptArea.horizontal-scroll {
     white-space: nowrap; 
     overflow-x: auto;
@@ -81,12 +92,12 @@ body {
 }
 #scriptArea.horizontal-scroll p {
     white-space: nowrap; 
-    margin: 0;
+    margin: 0; /* 移除 p 边距 */
     margin-right: 50px; 
 }
 
 
-/* ▼▼▼ 新功能：全屏按钮容器 ▼▼▼ */
+/* ▼▼▼ 全屏按钮 (和之前一样) ▼▼▼ */
 #fullscreenControls {
     position: fixed;
     top: 20px;
@@ -117,7 +128,7 @@ body {
 }
 
 
-/* ▼▼▼ 全屏模式的样式 ▼▼▼ */
+/* ▼▼▼ 全屏模式 (和之前一样) ▼▼▼ */
 body.fullscreen-active .controls { display: none; }
 body.fullscreen-active #fullscreenControls {
     display: flex;
