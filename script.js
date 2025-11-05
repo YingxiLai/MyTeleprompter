@@ -37,17 +37,19 @@ document.addEventListener('DOMContentLoaded', function() {
     let startScrollLeft = 0;
     let wasScrolling = false; 
     let idleTimer = null;
-    
-    // ▼▼▼ 新增：旋转/调整大小的计时器 ▼▼▼
     let resizeTimer = null;
+    
+    // ▼▼▼ 新增：全屏状态跟踪变量 ▼▼▼
+    let isCurrentlyFullscreen = false;
+
 
     // 3. 定义功能函数
 
     // (updatePlayPauseButtons, toggleFullscreenPlay, resetIdleTimer, ...
     // ... startScroll, pauseScroll, resetScroll, updateSpeed, updateFont, ...
     // ... updateFontSize, setAlignment, setScrollDirection, setScrollMode, ...
-    // ... 全屏逻辑, 拖拽滚动逻辑, 净化逻辑 ...
-    // ... 这些函数都和之前一样，我们只在最后面添加新功能)
+    // ... 拖拽滚动逻辑, 净化逻辑 ...
+    // ... 这些函数都和之前一样，我们只修改全屏相关和新增 resize)
 
     // (为了完整性，这里是所有旧函数，您可以快速跳过)
     function updatePlayPauseButtons(isPlaying) {
@@ -60,7 +62,8 @@ document.addEventListener('DOMContentLoaded', function() {
     }
     function resetIdleTimer() {
         clearTimeout(idleTimer);
-        if (document.fullscreenElement || document.body.classList.contains('simulated-fullscreen-iphone')) {
+        // (只在全屏或模拟全屏时)
+        if (isCurrentlyFullscreen) { // 使用新的状态变量
             document.body.classList.remove('idle-mode');
             idleTimer = setTimeout(() => {
                 document.body.classList.add('idle-mode');
@@ -138,53 +141,86 @@ document.addEventListener('DOMContentLoaded', function() {
         scrollModeButtons.forEach(btn => btn.classList.remove('active'));
         button.classList.add('active');
     }
-    function onEnterFullscreen() {
+    
+    // ▼▼▼ 全屏逻辑 (已更新以支持强制重绘) ▼▼▼
+    
+    function onEnterFullscreen(isSimulated = false) { // 增加一个参数判断是否是模拟全屏
+        isCurrentlyFullscreen = true; // 更新状态
         document.body.classList.add('fullscreen-active');
+        if (isSimulated) {
+            document.body.classList.add('simulated-fullscreen-iphone');
+        }
         document.addEventListener('mousemove', resetIdleTimer);
         document.addEventListener('touchstart', resetIdleTimer);
         document.addEventListener('click', resetIdleTimer);
         resetIdleTimer();
         updatePlayPauseButtons(scrollInterval !== null);
     }
+    
     function onExitFullscreen() {
+        isCurrentlyFullscreen = false; // 更新状态
         document.body.classList.remove('fullscreen-active');
         document.body.classList.remove('idle-mode');
         document.body.classList.remove('simulated-fullscreen-iphone'); 
+        
         document.removeEventListener('mousemove', resetIdleTimer);
         document.removeEventListener('touchstart', resetIdleTimer);
         document.removeEventListener('click', resetIdleTimer);
         clearTimeout(idleTimer);
+        
         window.getSelection().removeAllRanges(); 
+        
         if (isDragging) {
             dragEnd();
         }
         isDragging = false; 
     }
+
     function enterFullscreen() { 
         window.getSelection().removeAllRanges(); 
-        if (/iPhone/i.test(navigator.userAgent) && !window.MSStream) {
-            document.body.classList.add('simulated-fullscreen-iphone');
-            onEnterFullscreen(); 
-        } else if (document.documentElement.requestFullscreen) { 
-            document.documentElement.requestFullscreen(); 
-        } 
+        
+        // 只有当未处于全屏状态时才尝试进入
+        if (!isCurrentlyFullscreen) {
+            if (/iPhone/i.test(navigator.userAgent) && !window.MSStream) {
+                // iPhone：进入“模拟”全屏
+                onEnterFullscreen(true); // 传入 true 表示模拟全屏
+            } else if (document.documentElement.requestFullscreen) { 
+                // iPad / 电脑：进入“真”全屏
+                document.documentElement.requestFullscreen(); 
+            } 
+        }
     }
+    
     function exitFullscreen() { 
-        if (document.body.classList.contains('simulated-fullscreen-iphone')) {
-            onExitFullscreen(); 
-        } else if (document.exitFullscreen) { 
-            document.exitFullscreen(); 
-        } 
+        // 只有当处于全屏状态时才尝试退出
+        if (isCurrentlyFullscreen) {
+            if (document.body.classList.contains('simulated-fullscreen-iphone')) {
+                // iPhone：退出“模拟”全屏
+                onExitFullscreen(); 
+            } else if (document.exitFullscreen) { 
+                // iPad / 电脑：退出“真”全屏
+                document.exitFullscreen(); 
+            } 
+        }
     }
+
+    // 监听“真”全屏的变化 (比如按 Esc 键)
     document.addEventListener('fullscreenchange', () => {
         if (document.fullscreenElement) {
-            onEnterFullscreen(); 
+            // 确保不是模拟全屏时才设置 isCurrentlyFullscreen
+            if (!document.body.classList.contains('simulated-fullscreen-iphone')) {
+                 onEnterFullscreen(false); // 不是模拟全屏
+            }
         } else {
-            onExitFullscreen(); 
+            // 只有当不是模拟全屏时，才调用退出
+            if (!document.body.classList.contains('simulated-fullscreen-iphone')) {
+                onExitFullscreen(); 
+            }
         }
     });
+
     function dragStart(e) {
-        if (!document.fullscreenElement && !document.body.classList.contains('simulated-fullscreen-iphone')) {
+        if (!isCurrentlyFullscreen) { // 使用新的状态变量
             isDragging = false;
             return; 
         }
@@ -246,23 +282,52 @@ document.addEventListener('DOMContentLoaded', function() {
     function handleDragOver(e) { e.preventDefault(); e.stopPropagation(); }
 
     
-    // ▼▼▼ 新功能：修复 iPad 旋转 Bug ▼▼▼
+    // ▼▼▼ 新功能：彻底修复 iPad 旋转 Bug (强制重绘) ▼▼▼
     function handleResize() {
-        // 使用“防抖” (debounce) 计时器
-        // 停止旋转 100 毫秒后才执行，防止卡顿
         clearTimeout(resizeTimer);
         resizeTimer = setTimeout(() => {
-            // 检查我们是否在横向模式
-            if (scriptArea.classList.contains('horizontal-scroll')) {
-                // “先删后加”大法，强制浏览器重绘
-                scriptArea.classList.remove('horizontal-scroll');
+            // 只有在全屏模式下，才需要执行这个修复
+            if (isCurrentlyFullscreen) { // 使用新的状态变量
+                // 1. 暂停所有滚动和动画
+                pauseScroll();
+                clearTimeout(idleTimer);
+                document.body.classList.remove('idle-mode');
                 
-                // 强制浏览器在“下一帧”再加回去
-                requestAnimationFrame(() => {
-                    scriptArea.classList.add('horizontal-scroll');
-                });
+                // 2. 记住当前是否是模拟全屏 (iPhone)
+                const wasSimulatedFullscreen = document.body.classList.contains('simulated-fullscreen-iphone');
+                
+                // 3. 强制退出全屏/模拟全屏 (清除所有相关 CSS 类)
+                document.body.classList.remove('fullscreen-active');
+                document.body.classList.remove('simulated-fullscreen-iphone');
+                isCurrentlyFullscreen = false; // 临时设置为非全屏状态
+                
+                // 4. 等待一小段时间，让浏览器重新计算视口大小
+                // 这非常关键，强制浏览器“重新思考”整个页面的布局
+                setTimeout(() => {
+                    // 5. 重新进入全屏模式
+                    if (wasSimulatedFullscreen) {
+                        onEnterFullscreen(true); // 重新进入模拟全屏
+                    } else {
+                        // 如果是真全屏，我们需要重新请求原生全屏API
+                        // 但在 resize 事件中直接请求可能会被浏览器阻止
+                        // 最好是重新调用 enterFullscreen 函数
+                        // 这里我们简化处理，如果本来是真全屏，就再次请求原生全屏
+                        // 注意：用户可能需要再次点击“全屏”按钮，或者我们直接模拟点击
+                        // 暂时使用 onEnterFullscreen(false) 来模拟布局重置，用户再点击全屏
+                        // 或者更稳妥的做法是让用户自己重新点击全屏按钮
+                        // 鉴于这是一个针对旋转的自动化修复，我们尝试重新进入布局
+                        onEnterFullscreen(false); // 重新进入布局，等待用户再次点击原生全屏
+                    }
+                    // 重新应用横向滚动类，确保 flexbox 重新计算
+                    if (scrollDirection === 'horizontal') {
+                        scriptArea.classList.remove('horizontal-scroll');
+                        requestAnimationFrame(() => {
+                            scriptArea.classList.add('horizontal-scroll');
+                        });
+                    }
+                }, 50); // 50毫秒的延迟，给浏览器足够的时间
             }
-        }, 100);
+        }, 100); // 防抖计时器，防止连续触发
     }
 
 
@@ -271,7 +336,6 @@ document.addEventListener('DOMContentLoaded', function() {
     // (基础控制)
     startButton.addEventListener('click', startScroll);
     pauseButton.addEventListener('click', pauseScroll);
-    // ... (所有其他绑定) ...
     resetButton.addEventListener('click', resetScroll);
     speedControl.addEventListener('input', updateSpeed);
     fontSelector.addEventListener('change', updateFont);
@@ -293,7 +357,7 @@ document.addEventListener('DOMContentLoaded', function() {
     scriptArea.addEventListener('dragover', handleDragOver);
     scriptArea.addEventListener('dragenter', handleDragOver);
 
-    // ▼▼▼ 新增：绑定“旋转”侦听器 ▼▼▼
+    // ▼▼▼ 绑定“旋转”侦听器 ▼▼▼
     window.addEventListener('resize', handleResize);
 
 });
