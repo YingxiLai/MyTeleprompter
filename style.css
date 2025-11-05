@@ -1,93 +1,130 @@
 /* 整个页面 */
 body {
-    background-color: #000; /* 黑色背景 */
-    color: #fff; /* 白色文字 */
+    background-color: #000;
+    color: #fff;
     font-family: sans-serif;
     margin: 0;
     padding: 0;
-    /* 隐藏页面的滚动条 */
     overflow: hidden; 
 }
 
-/* 顶部的控制按钮区域 */
+/* ▼▼▼ 顶部的控制面板 (重构) ▼▼▼ */
 .controls {
     background-color: #222;
     padding: 10px;
-    text-align: center;
-    /* 固定在顶部 */
-    position: fixed;
     width: 100%;
+    position: fixed;
     top: 0;
     z-index: 10;
+    display: flex; /* 使用 flex 布局 */
+    flex-wrap: wrap; /* 允许换行 */
+    justify-content: center; /* 居中 */
+    align-items: center;
+    gap: 10px; /* 元素之间的间隙 */
 }
-
-/* 按钮样式 */
-button {
-    font-size: 16px;
-    padding: 8px 15px;
-    margin: 0 5px; /* 缩小了左右边距以容纳新按钮 */
+/* ... (控制面板的按钮, 控制组, 按钮组 样式都和之前一样, 省略) ... */
+.controls button {
+    font-size: 14px;
+    padding: 6px 12px;
     cursor: pointer;
+    background-color: #444;
+    color: white;
+    border: none;
+    border-radius: 4px;
 }
-
-/* 速度控制条 */
-input[type="range"] {
-    margin-left: 10px;
-    width: 100px;
-}
-
-/* 稿子文本区域 */
-#scriptArea {
-    background-color: #000; /* 黑色背景 */
-    color: #fff; /* 白色文字 */
-    width: 90%; /* 宽度占90%，留点边距 */
-    height: 85vh; /* 高度占屏幕的85% */
-    margin: 0 auto; /* 居中显示 */
-    display: block;
-    font-family: sans-serif; /* 强制默认字体为黑体 */
-    font-size: 60px;
-    line-height: 1.4; /* 行高，让字更清晰 */
-    border: none; /* 去掉边框 */
-    outline: none; /* 去掉点击时的蓝框 */
-    
-    /* 关键：让它在顶部按钮下方开始 */
-    padding-top: 70px; 
-    padding-left: 20px;
-    padding-right: 20px;
-    
-    /* 让文本框的尺寸变化更平滑 */
-    transition: all 0.2s ease;
-}
-
-/* 字体和速度旁边的文字 */
-.controls span {
-    font-size: 16px;
-    margin-left: 15px;
-    vertical-align: middle;
-}
-
-/* 美化下拉选择框 */
+.controls button:hover { background-color: #555; }
+.control-group { display: flex; align-items: center; gap: 5px; }
+.controls span { font-size: 14px; vertical-align: middle; }
+.controls input[type="range"] { width: 80px; }
 .controls select {
     font-size: 14px;
     padding: 5px;
-    margin-left: 5px;
-    vertical-align: middle;
+    background-color: #333;
+    color: white;
+    border: 1px solid #555;
 }
+.button-group { display: flex; }
+.button-group button { border-radius: 0; }
+.button-group button:first-child { border-top-left-radius: 4px; border-bottom-left-radius: 4px; }
+.button-group button:last-child { border-top-right-radius: 4px; border-bottom-right-radius: 4px; }
+.button-group button.active { background-color: #007bff; color: white; }
 
-/* ▼▼▼ --- 新增的全屏样式 --- ▼▼▼ */
 
-/* 当我们给 body 添加 .fullscreen-active 类时... */
-body.fullscreen-active .controls {
-    /* 隐藏控制栏 */
-    display: none;
-}
-
-body.fullscreen-active #scriptArea {
-    /* 让文本区域占满整个屏幕 */
-    height: 100vh;
-    width: 100%;
-    /* 顶部内边距也调整一下 */
-    padding-top: 20px; 
+/* ▼▼▼ 稿子文本区域 ▼▼▼ */
+#scriptArea {
+    background-color: #000;
+    color: #fff;
+    width: 90%; 
+    height: 85vh; 
+    margin: 0 auto; 
+    display: block;
+    
+    font-family: sans-serif; 
+    font-size: 60px;
+    line-height: 1.4; 
+    
+    border: none; 
+    outline: none; 
+    
+    padding-top: 120px; 
     padding-left: 20px;
     padding-right: 20px;
+    
+    transition: all 0.2s ease;
+    
+    overflow-x: hidden;
+    overflow-y: auto;
+    
+    white-space: normal;
+    overflow-wrap: break-word;
 }
-/* ▲▲▲ --- 新增样式结束 --- ▲▲▲ */
+
+/* ▼▼▼ 横向滚动样式 (已修复) ▼▼▼ */
+#scriptArea.horizontal-scroll {
+    white-space: nowrap; 
+    overflow-x: auto;
+    overflow-y: hidden;
+    
+    /* 关键：让所有 <p> 标签横向排列 */
+    display: flex;
+    flex-direction: row;
+    
+    /* ▼▼▼ 新增：让文字垂直居中 ▼▼▼ */
+    align-items: center;
+}
+/* 关键：设置 <p> 标签自身的样式 */
+#scriptArea.horizontal-scroll p {
+    white-space: nowrap; /* 强制 <p> 内部也不换行 */
+    margin: 0; /* 移除 <p> 默认的垂直边距 */
+    margin-right: 50px; /* 在“段落”之间增加 50px 的横向间距 */
+}
+
+
+/* ▼▼▼ 全屏 X 退出按钮 (和之前一样) ▼▼▼ */
+#exitFullscreenButton {
+    position: fixed;
+    top: 20px;
+    right: 20px;
+    width: 40px;
+    height: 40px;
+    font-size: 24px;
+    font-weight: bold;
+    color: white;
+    background-color: rgba(0, 0, 0, 0.5);
+    border: 2px solid white;
+    border-radius: 50%;
+    cursor: pointer;
+    z-index: 100;
+    display: none;
+}
+#exitFullscreenButton:hover { background-color: rgba(255, 0, 0, 0.7); }
+
+
+/* ▼▼▼ 全屏模式的样式 (和之前一样) ▼▼▼ */
+body.fullscreen-active .controls { display: none; }
+body.fullscreen-active #exitFullscreenButton { display: block; }
+body.fullscreen-active #scriptArea {
+    height: 100vh;
+    width: 100%;
+    padding-top: 20px; 
+}

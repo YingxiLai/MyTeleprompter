@@ -2,7 +2,7 @@
 <html lang="zh-CN">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
     <title>我的提词器</title>
     <link rel="stylesheet" href="style.css">
 </head>
@@ -10,36 +10,68 @@
 
     <div class="controls">
         
-        <button id="fullscreenButton">全屏 / 退出</button>
-        
-        <button id="startButton">开始滚动</button>
+        <button id="fullscreenButton" title="全屏">全屏</button>
+        <button id="startButton">开始</button>
         <button id="pauseButton">暂停</button>
         <button id="resetButton">重置</button>
         
-        <span>速度:</span>
-        <input type="range" id="speedControl" min="1" max="10" value="2">
+        <div class="control-group">
+            <span>速度:</span>
+            <input type="range" id="speedControl" min="1" max="10" value="2">
+        </div>
         
-        <span>字体:</span>
-        <select id="fontSelector">
-            <option value="sans-serif">默认字体 (黑体)</option>
-            <option value="'Songti SC', 'Times New Roman', serif">衬线体 (宋体)</option>
-            <option value="'Kaiti SC', 'KaiTi', serif">楷体</option>
-            <option value="monospace">等宽体 (编程)</option>
-        </select>
-        <span>字体大小:</span>
-        <input type="range" id="fontSizeControl" min="30" max="210" value="60">
+        <div class="control-group">
+            <span>大小:</span>
+            <input type="range" id="fontSizeControl" min="30" max="210" value="60">
+        </div>
+        
+        <div class="control-group">
+            <span>字体:</span>
+            <select id="fontSelector">
+                <option value="sans-serif">默认(黑体)</option>
+                <option value="'Songti SC', 'Times New Roman', serif">宋体</option>
+                <option value="'Kaiti SC', 'KaiTi', serif">楷体</option>
+                <option value="monospace">等宽</option>
+            </select>
+        </div>
+        
+        <div class="control-group">
+            <span>对齐:</span>
+            <div class="button-group">
+                <button class="align-btn" data-align="left">居左</button>
+                <button class="align-btn" data-align="center">居中</button>
+                <button class="align-btn" data-align="right">居右</button>
+            </div>
+        </div>
+        
+        <div class="control-group">
+            <span>方向:</span>
+            <div class="button-group">
+                <button class="scroll-dir-btn active" data-direction="vertical">竖向</button>
+                <button class="scroll-dir-btn" data-direction="horizontal">横向</button>
+            </div>
+        </div>
+        
+        <div class="control-group">
+            <span>模式:</span>
+            <div class="button-group">
+                <button class="scroll-mode-btn active" data-mode="loop">循环</button>
+                <button class="scroll-mode-btn" data-mode="single">单次</button>
+            </div>
+        </div>
         
     </div>
 
-    <textarea id="scriptArea">
-在这里粘贴你的讲稿...
-
-把这段文字替换成你自己的内容。
-
-你可以写很长很长的稿子。
-
-滚动将会从这里开始。
-    </textarea>
+    <div id="scriptArea" contenteditable="true" spellcheck="false">
+        <p>在这里粘贴或输入你的讲稿...</p>
+        <p>把这段文字替换成你自己的内容。</p>
+        <p>新功能：</p>
+        <p>1. 你现在可以直接拖动文字来滚动。</p>
+        <p>2. 你可以设置横向滚动。</p>
+        <p>3. 你可以设置文字居中。</p>
+    </div>
+    
+    <button id="exitFullscreenButton" title="退出全屏">X</button>
 
     <script src="script.js"></script>
 </body>
