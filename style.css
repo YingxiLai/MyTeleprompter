@@ -1,0 +1,76 @@
+/* 整个页面 */
+body {
+    background-color: #000; /* 黑色背景 */
+    color: #fff; /* 白色文字 */
+    font-family: sans-serif;
+    margin: 0;
+    padding: 0;
+    /* 隐藏页面的滚动条 */
+    overflow: hidden; 
+}
+
+/* 顶部的控制按钮区域 */
+.controls {
+    background-color: #222;
+    padding: 10px;
+    text-align: center;
+    /* 固定在顶部 */
+    position: fixed;
+    width: 100%;
+    top: 0;
+    z-index: 10;
+}
+
+/* 按钮样式 */
+button {
+    font-size: 16px;
+    padding: 8px 15px;
+    margin: 0 10px;
+    cursor: pointer;
+}
+
+/* 速度控制条 */
+input[type="range"] {
+    margin-left: 10px;
+    width: 100px;
+}
+
+/* 稿子文本区域 */
+#scriptArea {
+    background-color: #000; /* 黑色背景 */
+    color: #fff; /* 白色文字 */
+    width: 90%; /* 宽度占90%，留点边距 */
+    height: 85vh; /* 高度占屏幕的85% */
+    margin: 0 auto; /* 居中显示 */
+    display: block;
+    
+    /* ▼▼▼ 就是这里！我们添加了这一行！ ▼▼▼ */
+    font-family: sans-serif; /* 强制默认字体为黑体 */
+    
+    /* 关键：设置超大字体！*/
+    font-size: 60px;
+    line-height: 1.4; /* 行高，让字更清晰 */
+    
+    border: none; /* 去掉边框 */
+    outline: none; /* 去掉点击时的蓝框 */
+    
+    /* 关键：让它在顶部按钮下方开始 */
+    padding-top: 70px; 
+    padding-left: 20px;
+    padding-right: 20px;
+}
+
+/* 字体和速度旁边的文字 */
+.controls span {
+    font-size: 16px;
+    margin-left: 15px;
+    vertical-align: middle;
+}
+
+/* 美化下拉选择框 */
+.controls select {
+    font-size: 14px;
+    padding: 5px;
+    margin-left: 5px;
+    vertical-align: middle;
+}

@@ -1,0 +1,43 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>我的提词器</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+    <div class="controls">
+        <button id="startButton">开始滚动</button>
+        <button id="pauseButton">暂停</button>
+        <button id="resetButton">重置</button>
+        
+        <span>速度:</span>
+        <input type="range" id="speedControl" min="1" max="10" value="2">
+        
+        <span>字体:</span>
+        <select id="fontSelector">
+            <option value="sans-serif">默认字体 (黑体)</option>
+            <option value="'Times New Roman', serif">衬线体 (宋体/Times)</option>
+            <option value="monospace">等宽体 (编程)</option>
+            <option value="'KaiTi', 'Kaiti TC', 'BiauKai', serif">楷体</option>
+        </select>
+        
+        <span>字体大小:</span>
+        <input type="range" id="fontSizeControl" min="30" max="210" value="60">
+        </div>
+
+    <textarea id="scriptArea">
+在这里粘贴你的讲稿...
+
+把这段文字替换成你自己的内容。
+
+你可以写很长很长的稿子。
+
+滚动将会从这里开始。
+    </textarea>
+
+    <script src="script.js"></script>
+</body>
+</html>
