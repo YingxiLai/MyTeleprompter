@@ -57,7 +57,7 @@ body {
     height: 85vh; 
     margin: 0 auto; 
     display: block;
-    font-family: sans-serif; /* 默认字体 */
+    font-family: sans-serif; 
     font-size: 60px;
     line-height: 1.4; 
     border: none; 
@@ -71,17 +71,11 @@ body {
     white-space: normal;
     overflow-wrap: break-word;
 }
-
-/* ▼▼▼ 关键：强制 <p> 标签继承字体 ▼▼▼ */
-/* 这会覆盖 contenteditable 的默认 <p> 样式 */
 #scriptArea p {
     font-family: inherit;
-    /* 移除浏览器默认的 p 边距，这很重要 */
     margin-block-start: 0;
     margin-block-end: 0;
 }
-
-/* ▼▼▼ 横向滚动样式 ▼▼▼ */
 #scriptArea.horizontal-scroll {
     white-space: nowrap; 
     overflow-x: auto;
@@ -92,7 +86,7 @@ body {
 }
 #scriptArea.horizontal-scroll p {
     white-space: nowrap; 
-    margin: 0; /* 移除 p 边距 */
+    margin: 0;
     margin-right: 50px; 
 }
 
@@ -141,4 +135,10 @@ body.fullscreen-active #scriptArea {
 }
 body.idle-mode #fullscreenControls {
     opacity: 0; /* 自动隐藏 */
+}
+
+/* ▼▼▼ 新功能：iPhone 模拟全屏的 额外 样式 ▼▼▼ */
+/* 这会覆盖 'padding-top: 20px'，给 iPhone 状态栏留空间 */
+body.simulated-fullscreen-iphone.fullscreen-active #scriptArea {
+    padding-top: 60px;
 }

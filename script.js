@@ -1,7 +1,7 @@
 // 等待 HTML 内容全部加载完毕
 document.addEventListener('DOMContentLoaded', function() {
 
-    // 1. 找到所有 HTML 元素 (省略)
+    // 1. 找到所有 HTML 元素
     const scriptArea = document.getElementById('scriptArea');
     const startButton = document.getElementById('startButton');
     const pauseButton = document.getElementById('pauseButton');
@@ -16,7 +16,17 @@ document.addEventListener('DOMContentLoaded', function() {
     const scrollDirButtons = document.querySelectorAll('.scroll-dir-btn');
     const scrollModeButtons = document.querySelectorAll('.scroll-mode-btn');
 
-    // 2. 定义全局状态变量 (省略)
+    // ▼▼▼ 新功能：检测苹果设备并隐藏字体按钮 ▼▼▼
+    // (这段代码必须在 2. 定义变量 之前)
+    const isAppleDevice = /iPhone|iPad|iPod|Mac/i.test(navigator.userAgent);
+    if (isAppleDevice) {
+        const fontControlGroup = fontSelector.closest('.control-group');
+        if (fontControlGroup) {
+            fontControlGroup.style.display = 'none'; // 隐藏整个字体组
+        }
+    }
+
+    // 2. 定义全局状态变量
     let scrollInterval = null; 
     let scrollSpeed = 10 - speedControl.value; 
     let scrollDirection = 'vertical';
@@ -31,7 +41,6 @@ document.addEventListener('DOMContentLoaded', function() {
 
     // 3. 定义功能函数
 
-    // ... (所有其他函数都和之前一样)
     function updatePlayPauseButtons(isPlaying) {
         if (isPlaying) { fullscreenPlayPauseButton.textContent = '暂停'; } 
         else { fullscreenPlayPauseButton.textContent = '播放'; }
@@ -42,7 +51,8 @@ document.addEventListener('DOMContentLoaded', function() {
     }
     function resetIdleTimer() {
         clearTimeout(idleTimer);
-        if (document.fullscreenElement) {
+        // (只在全屏或模拟全屏时)
+        if (document.fullscreenElement || document.body.classList.contains('simulated-fullscreen-iphone')) {
             document.body.classList.remove('idle-mode');
             idleTimer = setTimeout(() => {
                 document.body.classList.add('idle-mode');
@@ -86,14 +96,9 @@ document.addEventListener('DOMContentLoaded', function() {
         scrollSpeed = 11 - speedControl.value;
         if (scrollInterval) { startScroll(); }
     }
-    
-    // ▼▼▼ 更新字体 (已回滚到“简洁”版) ▼▼▼
-    // CSS (style.css) 里的 "#scriptArea p { font-family: inherit; }"
-    // 将会处理继承问题，这比 JS 遍历更健壮
     function updateFont() {
         scriptArea.style.fontFamily = fontSelector.value;
     }
-    
     function updateFontSize() {
         scriptArea.style.fontSize = fontSizeControl.value + 'px';
     }
@@ -125,41 +130,80 @@ document.addEventListener('DOMContentLoaded', function() {
         scrollModeButtons.forEach(btn => btn.classList.remove('active'));
         button.classList.add('active');
     }
+    
+    // ▼▼▼ 全屏逻辑 (已重构为 iPhone 模拟全屏) ▼▼▼
+    
+    // 提取的“进入全屏”逻辑
+    function onEnterFullscreen() {
+        document.body.classList.add('fullscreen-active');
+        document.addEventListener('mousemove', resetIdleTimer);
+        document.addEventListener('touchstart', resetIdleTimer);
+        document.addEventListener('click', resetIdleTimer);
+        resetIdleTimer();
+        updatePlayPauseButtons(scrollInterval !== null);
+    }
+    
+    // 提取的“退出全屏”逻辑
+    function onExitFullscreen() {
+        document.body.classList.remove('fullscreen-active');
+        document.body.classList.remove('idle-mode');
+        // (移除 iPhone 模拟)
+        document.body.classList.remove('simulated-fullscreen-iphone'); 
+        
+        document.removeEventListener('mousemove', resetIdleTimer);
+        document.removeEventListener('touchstart', resetIdleTimer);
+        document.removeEventListener('click', resetIdleTimer);
+        clearTimeout(idleTimer);
+        
+        window.getSelection().removeAllRanges(); // 清除选中
+        
+        // (修复 iPad 卡死)
+        if (isDragging) {
+            dragEnd();
+        }
+        isDragging = false; 
+    }
+
+    // “进入”按钮
     function enterFullscreen() { 
         window.getSelection().removeAllRanges(); 
-        if (document.documentElement.requestFullscreen) { 
+        
+        // 侦测 iPhone
+        if (/iPhone/i.test(navigator.userAgent) && !window.MSStream) {
+            // iPhone：进入“模拟”全屏
+            document.body.classList.add('simulated-fullscreen-iphone');
+            onEnterFullscreen(); // 手动调用“进入”逻辑
+        } else if (document.documentElement.requestFullscreen) { 
+            // iPad / 电脑：进入“真”全屏
             document.documentElement.requestFullscreen(); 
         } 
     }
+    
+    // “退出”按钮
     function exitFullscreen() { 
-        if (document.exitFullscreen) { 
+        // 侦测是否在“模拟”全屏
+        if (document.body.classList.contains('simulated-fullscreen-iphone')) {
+            // iPhone：退出“模拟”全屏
+            onExitFullscreen(); // 手动调用“退出”逻辑
+        } else if (document.exitFullscreen) { 
+            // iPad / 电脑：退出“真”全屏
             document.exitFullscreen(); 
         } 
     }
+
+    // 监听“真”全屏的变化 (比如按 Esc 键)
     document.addEventListener('fullscreenchange', () => {
         if (document.fullscreenElement) {
-            document.body.classList.add('fullscreen-active');
-            document.addEventListener('mousemove', resetIdleTimer);
-            document.addEventListener('touchstart', resetIdleTimer);
-            document.addEventListener('click', resetIdleTimer);
-            resetIdleTimer();
-            updatePlayPauseButtons(scrollInterval !== null);
+            onEnterFullscreen(); // 调用“进入”逻辑
         } else {
-            document.body.classList.remove('fullscreen-active');
-            document.body.classList.remove('idle-mode'); 
-            document.removeEventListener('mousemove', resetIdleTimer);
-            document.removeEventListener('touchstart', resetIdleTimer);
-            document.removeEventListener('click', resetIdleTimer);
-            clearTimeout(idleTimer);
-            window.getSelection().removeAllRanges(); 
-            if (isDragging) {
-                dragEnd();
-            }
-            isDragging = false; 
+            onExitFullscreen(); // 调用“退出”逻辑
         }
     });
+
+    // (拖拽滚动逻辑 和 净化逻辑 和之前一样，省略)
     function dragStart(e) {
-        if (!document.fullscreenElement) {
+        // (智能模式：只在全屏或模拟全屏时启动)
+        if (!document.fullscreenElement && !document.body.classList.contains('simulated-fullscreen-iphone')) {
             isDragging = false;
             return; 
         }
@@ -221,7 +265,7 @@ document.addEventListener('DOMContentLoaded', function() {
     function handleDragOver(e) { e.preventDefault(); e.stopPropagation(); }
 
 
-    // 4. 把所有功能绑定到按钮上 (省略)
+    // 4. 把所有功能绑定到按钮上 (和之前一样)
     startButton.addEventListener('click', startScroll);
     pauseButton.addEventListener('click', pauseScroll);
     resetButton.addEventListener('click', resetScroll);
