@@ -1,14 +1,10 @@
 // 等待 HTML 内容全部加载完毕
 document.addEventListener('DOMContentLoaded', function() {
 
-    // 1. 找到所有 HTML 元素
+    // 1. 找到所有 HTML 元素 (省略，和之前一样)
     const scriptArea = document.getElementById('scriptArea');
     const startButton = document.getElementById('startButton');
-    const pauseButton = document.getElementById('pauseButton');
-    const resetButton = document.getElementById('resetButton');
-    const speedControl = document.getElementById('speedControl');
-    const fontSelector = document.getElementById('fontSelector');
-    const fontSizeControl = document.getElementById('fontSizeControl');
+    // ... (所有其他元素) ...
     const fullscreenButton = document.getElementById('fullscreenButton');
     const fullscreenPlayPauseButton = document.getElementById('fullscreenPlayPauseButton');
     const fullscreenExitButton = document.getElementById('fullscreenExitButton');
@@ -16,7 +12,7 @@ document.addEventListener('DOMContentLoaded', function() {
     const scrollDirButtons = document.querySelectorAll('.scroll-dir-btn');
     const scrollModeButtons = document.querySelectorAll('.scroll-mode-btn');
 
-    // 2. 定义全局状态变量
+    // 2. 定义全局状态变量 (省略，和之前一样)
     let scrollInterval = null; 
     let scrollSpeed = 10 - speedControl.value; 
     let scrollDirection = 'vertical';
@@ -31,6 +27,11 @@ document.addEventListener('DOMContentLoaded', function() {
 
     // 3. 定义功能函数
 
+    // (startScroll, pauseScroll, resetScroll, ... 
+    // ... updateSpeed, updateFontSize, ...
+    // ... 这些函数都和之前一样，我们只修改 updateFont)
+
+    // (为了完整性，这里是所有旧函数，您可以快速跳过)
     function updatePlayPauseButtons(isPlaying) {
         if (isPlaying) { fullscreenPlayPauseButton.textContent = '暂停'; } 
         else { fullscreenPlayPauseButton.textContent = '播放'; }
@@ -85,9 +86,21 @@ document.addEventListener('DOMContentLoaded', function() {
         scrollSpeed = 11 - speedControl.value;
         if (scrollInterval) { startScroll(); }
     }
+    
+    // ▼▼▼ 更新字体 (已升级为“强力”版) ▼▼▼
     function updateFont() {
-        scriptArea.style.fontFamily = fontSelector.value;
+        const selectedFont = fontSelector.value;
+        
+        // 1. 设置容器的字体 (为了让新打的字也是新字体)
+        scriptArea.style.fontFamily = selectedFont;
+        
+        // 2. “强力”修复: 遍历所有已存在的 <p> 标签，强制应用
+        const paragraphs = scriptArea.querySelectorAll('p');
+        paragraphs.forEach(p => {
+            p.style.fontFamily = selectedFont;
+        });
     }
+    
     function updateFontSize() {
         scriptArea.style.fontSize = fontSizeControl.value + 'px';
     }
@@ -119,7 +132,6 @@ document.addEventListener('DOMContentLoaded', function() {
         scrollModeButtons.forEach(btn => btn.classList.remove('active'));
         button.classList.add('active');
     }
-    
     function enterFullscreen() { 
         window.getSelection().removeAllRanges(); // 清除选中
         if (document.documentElement.requestFullscreen) { 
@@ -131,10 +143,8 @@ document.addEventListener('DOMContentLoaded', function() {
             document.exitFullscreen(); 
         } 
     }
-
     document.addEventListener('fullscreenchange', () => {
         if (document.fullscreenElement) {
-            // --- 进入全屏 ---
             document.body.classList.add('fullscreen-active');
             document.addEventListener('mousemove', resetIdleTimer);
             document.addEventListener('touchstart', resetIdleTimer);
@@ -142,23 +152,19 @@ document.addEventListener('DOMContentLoaded', function() {
             resetIdleTimer();
             updatePlayPauseButtons(scrollInterval !== null);
         } else {
-            // --- 退出全屏 ---
             document.body.classList.remove('fullscreen-active');
             document.body.classList.remove('idle-mode'); 
             document.removeEventListener('mousemove', resetIdleTimer);
             document.removeEventListener('touchstart', resetIdleTimer);
             document.removeEventListener('click', resetIdleTimer);
             clearTimeout(idleTimer);
-            
             window.getSelection().removeAllRanges(); // 清除选中
-            
             if (isDragging) {
                 dragEnd();
             }
             isDragging = false; 
         }
     });
-
     function dragStart(e) {
         if (!document.fullscreenElement) {
             isDragging = false;
@@ -199,7 +205,6 @@ document.addEventListener('DOMContentLoaded', function() {
             wasScrolling = false; 
         }
     }
-    
     function handlePaste(e) {
         e.preventDefault();
         let text = '';
